@@ -2,6 +2,8 @@
 ##!
 ##! Ported from ruby script found here:
 ##!     https://gist.github.com/jedisct1/5149014
+##! Which was ported from the javascript script found here:
+##!     http://www.malwaredomainlist.com/forums/index.php?topic=4962.0
 ##!
 ##! Requires: Bro 2.1+
 ##! Author:   Seth Hall <seth@icir.org>
@@ -16,15 +18,14 @@ export {
 	## and calculated.
 	global g01pack_current_names: set[string] = set();
 
-	## Domain segments for g01pack.  Probably don't want to touch these.
-	const g01pack_domains = vector(".doesntexist.com", ".dnsalias.com", ".dynalias.com") &redef;
-	## Subdomain segments for g01pack.  Probably don't want to touch these.
-	const g01pack_dict = vector("as","un","si","speed","no","r","in","me","da","a","o","c","try","to","n","h","call","us","why","q","k","old","j","g","how","ri","i","net","t","ko","tu","host","on","ad","portal","na","order","b","ask","l","s","d","po","cat","for","m","off","own","e","f","p","le","is") &redef;
-
 	redef enum Kit += { G01PACK };
 }
 
-function generate_g01pack_name(offset: interval): string
+## Domain segments for g01pack.  Probably don't want to touch these.
+global g01pack_domains = vector(".doesntexist.com", ".dnsalias.com", ".dynalias.com");
+global g01pack_dicts: table[count] of vector of string = table();
+
+function generate_g01pack_name(dict: vector of string, offset: interval): string
 	{
 	local ts = strftime("%Y %m %d %H", network_time_for_strftime() + offset);
 	local parts =  split(ts, / /);
@@ -33,20 +34,20 @@ function generate_g01pack_name(offset: interval): string
 	local c2 = to_count(parts[2]) + c1 - 1;
 	local c3 = to_count(parts[1]) + c2;
 
-	local d0 = c0 % |g01pack_dict|;
-	local d1 = c1 % |g01pack_dict|;
-	local d2 = c2 % |g01pack_dict|;
-	local d3 = c3 % |g01pack_dict|;
+	local d0 = c0 % |dict|;
+	local d1 = c1 % |dict|;
+	local d2 = c2 % |dict|;
+	local d3 = c3 % |dict|;
 
 	if ( d0 == d1 )
-		d1 = (d1+1) % |g01pack_dict|;
+		d1 = (d1+1) % |dict|;
 	if ( d1 == d2 )
-		d2 = (d2+1) % |g01pack_dict|;
+		d2 = (d2+1) % |dict|;
 	if ( d2 == d3 )
-		d3 = (d3+1) % |g01pack_dict|;
+		d3 = (d3+1) % |dict|;
 
 	local domain = g01pack_domains[(c0 % |g01pack_domains|)];
-	local subdomain = g01pack_dict[d0] + g01pack_dict[d1] + g01pack_dict[d2] + g01pack_dict[d3];
+	local subdomain = dict[d0] + dict[d1] + dict[d2] + dict[d3];
 
 	return subdomain + domain;
 	}
@@ -56,9 +57,14 @@ function generate_g01pack_names(): set[string]
 	local results: set[string] = set();
 	for ( offset in offsets )
 		{
-		local d = generate_g01pack_name(offset);
-		add results[d];
-		domains[d] = G01PACK;
+		for ( dict in g01pack_dicts )
+			{
+			local d = generate_g01pack_name(g01pack_dicts[dict], offset);
+			if ( offset == 0sec )
+				print d;
+			add results[d];
+			domains[d] = G01PACK;
+			}
 		}
 	return results;
 	}
@@ -73,6 +79,9 @@ event update_g01pack_current_names()
 
 event bro_init()
 	{
+	g01pack_dicts[1] = vector("t","speed","off","q","ask","why","portal","un","m","is","po","le","us","order","host","na","p","own","call","as","j","o","old","no","si","h","ad","e","r","g","to","cat","n","ko","how","i","tu","l","d","in","on","da","b","ri","f","try","a","k","for","me","net","c","s");
+	g01pack_dicts[2] = vector("as","un","si","speed","no","r","in","me","da","a","o","c","try","to","n","h","call","us","why","q","k","old","j","g","how","ri","i","net","t","ko","tu","host","on","ad","portal","na","order","b","ask","l","s","d","po","cat","for","m","off","own","e","f","p","le","is");
+
 	event update_g01pack_current_names();
 	}
 
