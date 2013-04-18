@@ -60,8 +60,6 @@ function generate_g01pack_names(): set[string]
 		for ( dict in g01pack_dicts )
 			{
 			local d = generate_g01pack_name(g01pack_dicts[dict], offset);
-			if ( offset == 0sec )
-				print d;
 			add results[d];
 			domains[d] = G01PACK;
 			}
