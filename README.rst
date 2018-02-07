@@ -5,7 +5,7 @@ Detect domain generation algorithms (DGA) with Bro.  The module will regularly
 generate domains by any implemented algorithms and watch for those domains
 in DNS queries.
 
-This script only works with Bro 2.1+.
+This script only works with Bro 2.4+.
 
 Installation
 ------------
