@@ -28,11 +28,11 @@ global g01pack_dicts: table[count] of vector of string = table();
 function generate_g01pack_name(dict: vector of string, offset: interval): string
 	{
 	local ts = strftime("%Y %m %d %H", network_time_for_strftime() + offset);
-	local parts =  split(ts, / /);
-	local c0 = to_count(parts[4]);
-	local c1 = to_count(parts[3]) + c0;
-	local c2 = to_count(parts[2]) + c1 - 1;
-	local c3 = to_count(parts[1]) + c2;
+	local parts =  split_string(ts, / /);
+	local c0 = to_count(parts[3]);
+	local c1 = to_count(parts[2]) + c0;
+	local c2 = to_count(parts[1]) + c1 - 1;
+	local c3 = to_count(parts[0]) + c2;
 
 	local d0 = c0 % |dict|;
 	local d1 = c1 % |dict|;
