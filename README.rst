@@ -1,3 +1,10 @@
+THIS SCRIPT LIKELY NO LONGER APPLIES TO THE WORLD.  IT'S IMPLEMENTING
+A DGA FOR VERY OLD MALWARE THAT IS LIKELY NO LONGER PRESENT IN THE WILD.
+
+I'm only leaving the repository here because it's possible for someone
+to learn something from the scripts.
+
+
 Domain Generation Algorithm for Bro
 ===================================
 
